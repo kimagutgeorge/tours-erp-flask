@@ -1,6 +1,5 @@
 from flask import Flask, render_template, url_for, request, jsonify
-from models.models import db, User, user_login  # Import the db and User model
-from werkzeug.security import check_password_hash  # To verify password hashes
+from models.models import db, User, verify_user  # Import the db and User model
 
 app = Flask(__name__)
 
@@ -35,14 +34,14 @@ def process():
     action = request.args.get('link')
 
     if action =='login':
-        # Get username and password from the AJAX request
+         # Get username and password from the AJAX request
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # Query the database for the user
-        user = User.query.filter_by(username=username).first()
+        # Verify the user using the function from models.py
+        user = verify_user(username, password)
         
-        if user and check_password_hash(user.password, password):  # Verify the password
+        if user:
             return jsonify({"message": "Login successful", "status": "success"})
         else:
             return jsonify({"message": "Invalid username or password", "status": "error"}), 401
